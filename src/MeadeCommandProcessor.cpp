@@ -241,6 +241,27 @@ const char *MeadeCommandProcessor::onSiteName(uint8_t index)
     return _siteNameScratch;
 }
 
+namespace
+{
+oat::core::meade::MeadePierSide toMeadePierSide(PierSide side)
+{
+    switch (side)
+    {
+        case PIER_SIDE_EAST:
+            return oat::core::meade::MeadePierSide::East;
+        case PIER_SIDE_WEST:
+            return oat::core::meade::MeadePierSide::West;
+        default:
+            return oat::core::meade::MeadePierSide::Unknown;
+    }
+}
+}  // namespace
+
+oat::core::meade::MeadePierSide MeadeCommandProcessor::onPierSide()
+{
+    return toMeadePierSide(_mount->getPierSide());
+}
+
 /////////////////////////////
 // GPS CONTROL
 /////////////////////////////
@@ -497,6 +518,16 @@ oat::core::meade::ExtraStepperCoords MeadeCommandProcessor::onGetTargetCoordinat
     oat::core::meade::ExtraStepperCoords pos;
     _mount->calculateStepperPositions(raCoord, decCoord, pos.raPos, pos.decPos);
     return pos;
+}
+
+oat::core::meade::MeadePierSide MeadeCommandProcessor::onGetPierSide()
+{
+    return toMeadePierSide(_mount->getPierSide());
+}
+
+oat::core::meade::MeadePierSide MeadeCommandProcessor::onGetDestinationPierSide(float raCoord, float decCoord)
+{
+    return toMeadePierSide(_mount->getDestinationPierSide(raCoord, decCoord));
 }
 
 const char *MeadeCommandProcessor::onGetStepperInfo()

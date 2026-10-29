@@ -225,6 +225,14 @@ enum class MeadeTrackingRate
     Solar,
 };
 
+/** @brief Pointing state (ASCOM SideOfPier); controls wire bytes for `:Gm#` and `:XGP#`. */
+enum class MeadePierSide
+{
+    East,     ///< "E" — normal pointing state, looking west
+    West,     ///< "W" — through-the-pole pointing state, looking east
+    Unknown,  ///< "N"
+};
+
 /**
  * @brief Pure callback interface for the Meade `:G...` (Get) command family.
  *
@@ -265,6 +273,9 @@ class IMeadeGetHandlers
 
     /** @param index Site name slot, 1..4. */
     virtual const char *onSiteName(uint8_t index) = 0;
+
+    /** @brief `:Gm#` — current pointing state. */
+    virtual MeadePierSide onPierSide() = 0;
 };
 
 /**
@@ -740,6 +751,8 @@ class IMeadeExtraHandlers
     virtual const char *onGetAutoHomingStates()                                              = 0;
     virtual ExtraAzAltPositions onGetAzAltPositions()                                        = 0;
     virtual ExtraStepperCoords onGetTargetCoordinatePositions(float raCoord, float decCoord) = 0;
+    virtual MeadePierSide onGetPierSide()                                                    = 0;
+    virtual MeadePierSide onGetDestinationPierSide(float raCoord, float decCoord)            = 0;
     virtual const char *onGetStepperInfo()                                                   = 0;
     virtual const char *onGetMountHardwareInfo()                                             = 0;
     virtual const char *onGetLogBuffer()                                                     = 0;

@@ -27,6 +27,8 @@ class FakeHandlers : public meade::IMeadeGetHandlers
     const char *status    = "Idle,---,0,0";
     const char *siteNames = nullptr;  // when null, default OAT<index> is returned
 
+    meade::MeadePierSide pierSide = meade::MeadePierSide::Unknown;
+
     meade::RaCoordinate currentRa      = {1, 2, 3};
     meade::RaCoordinate targetRa       = {4, 5, 6};
     meade::DecCoordinate currentDec    = {7, 8, 9, false};
@@ -142,6 +144,11 @@ class FakeHandlers : public meade::IMeadeGetHandlers
         siteScratch[3] = static_cast<char>('0' + index);
         siteScratch[4] = '\0';
         return siteScratch;
+    }
+    meade::MeadePierSide onPierSide() override
+    {
+        lastCall = "pierSide";
+        return pierSide;
     }
 };
 
@@ -286,6 +293,18 @@ TEST(MeadeGet, mount_status_passes_through)
     h.status = "Idle,---,0,0";
     EXPECT_STREQ("Idle,---,0,0#", dispatch("X", h));
     EXPECT_STREQ("status", h.lastCall);
+}
+
+TEST(MeadeGet, pier_side_emits_onstep_letters)
+{
+    FakeHandlers h;
+    h.pierSide = meade::MeadePierSide::East;
+    EXPECT_STREQ("E#", dispatch("m", h));
+    EXPECT_STREQ("pierSide", h.lastCall);
+    h.pierSide = meade::MeadePierSide::West;
+    EXPECT_STREQ("W#", dispatch("m", h));
+    h.pierSide = meade::MeadePierSide::Unknown;
+    EXPECT_STREQ("N#", dispatch("m", h));
 }
 
 TEST(MeadeGet, is_slewing_emits_zero_one)

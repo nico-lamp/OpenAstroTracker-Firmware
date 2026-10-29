@@ -122,6 +122,25 @@ void handleExtraGetLeaf(MeadeResponse &r, const char *leafInput, IMeadeExtraHand
         fillLongPairPipeResponse(r, pos.raPos, pos.decPos);
         return;
     }
+    if (isExact(leafInput, "P"))
+    {
+        writePierSide(r, h.onGetPierSide());
+        return;
+    }
+    if (startsWith(leafInput, "P"))
+    {
+        // Payload format: "<ra>*<dec>" — float pair separated by '*', same as :XGC.
+        const char *payload = leafInput + 1;
+        const char *star    = strchr(payload, '*');
+        if (star == nullptr || star == payload)
+        {
+            return;
+        }
+        const float raCoord  = static_cast<float>(strtod(payload, nullptr));
+        const float decCoord = static_cast<float>(strtod(star + 1, nullptr));
+        writePierSide(r, h.onGetDestinationPierSide(raCoord, decCoord));
+        return;
+    }
     if (isExact(leafInput, "MS"))
     {
         fillFramedTextResponse(r, h.onGetStepperInfo());

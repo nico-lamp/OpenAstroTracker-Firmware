@@ -3629,6 +3629,53 @@ void Mount::calculateStepperPositions(float raCoord, float decCoord, long &raPos
 
 /////////////////////////////////
 //
+// pierSideFromDecSteps
+//
+/////////////////////////////////
+// calculateRAandDECSteppers() offers two families of solutions for every target: the direct one (Solution 1)
+// and the one with both axes turned around (Solution 2/3, the meridian flip). Which one the mount is in can be
+// read from the DEC axis: the direct solution sits on the positive side of the pole in the northern hemisphere
+// (negative in the southern one, where moveDEC is inverted), the flipped one on the other side.
+PierSide Mount::pierSideFromDecSteps(long decSteps) const
+{
+#if defined(OAM) || defined(OAE)
+    // Home is the pole with the counterweight down and the RA axis at LST+6h, so the direct solution covers
+    // targets east of the meridian. Looking east with the counterweight down puts the scope on the west side
+    // of the pier, which ASCOM calls the through-the-pole state (pierWest). The flipped solution is pierEast.
+    const float degreePos = (decSteps / _stepsPerDECDegree) + _zeroPosDEC;  // u-steps / u-steps/deg = deg
+    const bool flipped    = inNorthernHemisphere ? (degreePos < 0) : (degreePos > 0);
+    return flipped ? PIER_SIDE_EAST : PIER_SIDE_WEST;
+#else
+    // The OAT tracker has no counterweight and its flip is not tied to the meridian
+    (void) decSteps;
+    return PIER_SIDE_UNKNOWN;
+#endif
+}
+
+/////////////////////////////////
+//
+// getPierSide
+//
+/////////////////////////////////
+PierSide Mount::getPierSide() const
+{
+    return pierSideFromDecSteps(_stepperDEC->currentPosition());
+}
+
+/////////////////////////////////
+//
+// getDestinationPierSide
+//
+/////////////////////////////////
+PierSide Mount::getDestinationPierSide(float raCoord, float decCoord)
+{
+    long raPos, decPos;
+    calculateStepperPositions(raCoord, decCoord, raPos, decPos);
+    return pierSideFromDecSteps(decPos);
+}
+
+/////////////////////////////////
+//
 // calculateRAandDECSteppers
 //
 // This code tells the steppers to what location to move to, given the select right ascension and declination

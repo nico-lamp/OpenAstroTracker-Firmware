@@ -325,6 +325,25 @@ void writeTrackingRate(MeadeResponse &r, MeadeTrackingRate t)
     writeTerminator(r);
 }
 
+void writePierSide(MeadeResponse &r, MeadePierSide side)
+{
+    char c = 'N';
+    switch (side)
+    {
+        case MeadePierSide::East:
+            c = 'E';
+            break;
+        case MeadePierSide::West:
+            c = 'W';
+            break;
+        case MeadePierSide::Unknown:
+            c = 'N';
+            break;
+    }
+    writeChar(r, c);
+    writeTerminator(r);
+}
+
 // Write a positive int without padding or sign.
 void writeInt(MeadeResponse &r, int value)
 {

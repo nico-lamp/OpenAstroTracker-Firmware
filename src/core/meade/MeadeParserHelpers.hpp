@@ -85,6 +85,7 @@ void writeLocalDate(MeadeResponse &r, const MeadeLocalDate &d);
 void writeUtcOffset(MeadeResponse &r, int hours);
 void writeClockFormat(MeadeResponse &r, MeadeClockFormat f);
 void writeTrackingRate(MeadeResponse &r, MeadeTrackingRate t);
+void writePierSide(MeadeResponse &r, MeadePierSide side);
 
 void writeInt(MeadeResponse &r, int value);
 void writeSignedInt(MeadeResponse &r, int value);

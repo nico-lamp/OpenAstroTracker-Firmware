@@ -142,6 +142,14 @@ enum FocuserDirection
     FOCUS_FORWARD  = 1
 };
 
+// Pointing state of the mount, as defined by ASCOM SideOfPier
+enum PierSide
+{
+    PIER_SIDE_UNKNOWN,
+    PIER_SIDE_EAST,  // Normal pointing state: scope on the east side of the pier, looking west
+    PIER_SIDE_WEST,  // Through-the-pole pointing state: scope on the west side of the pier, looking east
+};
+
 //////////////////////////////////////////////////////////////////
 //
 // Class that represent the OpenAstroTracker mount, with all its parameters, motors, etc.
@@ -295,6 +303,12 @@ class Mount
     void syncPosition(DayTime ra, Declination dec);
 
     void calculateStepperPositions(float raCoord, float decCoord, long &raPos, long &decPos);
+
+    // Get the current pointing state (side of pier) of the mount
+    PierSide getPierSide() const;
+
+    // Get the pointing state (side of pier) the mount would end up in when slewing to the given coordinates
+    PierSide getDestinationPierSide(float raCoord, float decCoord);
 
     // Calculates movement parameters and program steppers to move
     // there. Must call loop() frequently to actually move.
@@ -538,6 +552,9 @@ class Mount
 
     void displayStepperPosition();
     void moveSteppersTo(float targetRA, float targetDEC, StepperAxis direction);
+
+    // Determine the pointing state from a DEC stepper position
+    PierSide pierSideFromDecSteps(long decSteps) const;
 
     void autoCalcHa();
 

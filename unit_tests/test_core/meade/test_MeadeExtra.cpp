@@ -31,6 +31,9 @@ class FakeExtra : public meade::IMeadeExtraHandlers
     bool levelAvailable     = true;
     bool startupCalled      = false;
     bool shutdownCalled     = false;
+    bool destinationCalled  = false;
+    float destinationRa     = 0.0f;
+    float destinationDec    = 0.0f;
 
     // Returned values
     float raSpd  = 100.5f;
@@ -38,6 +41,9 @@ class FakeExtra : public meade::IMeadeExtraHandlers
     float altSpd = 12.5f;
     float azSpd  = 13.5f;
     meade::ExtraDecLimits decLimits {-30.5f, 45.5f};
+    meade::MeadePierSide pierSide            = meade::MeadePierSide::West;
+    meade::MeadePierSide destinationPierSide = meade::MeadePierSide::East;
+
     float speedCalibration     = 1.00125f;
     float remainingSafeTime    = 3.5f;
     float trackingSpeed        = 0.0041667f;
@@ -127,6 +133,17 @@ class FakeExtra : public meade::IMeadeExtraHandlers
     meade::ExtraStepperCoords onGetTargetCoordinatePositions(float, float) override
     {
         return targetCoords;
+    }
+    meade::MeadePierSide onGetPierSide() override
+    {
+        return pierSide;
+    }
+    meade::MeadePierSide onGetDestinationPierSide(float raCoord, float decCoord) override
+    {
+        destinationCalled = true;
+        destinationRa     = raCoord;
+        destinationDec    = decCoord;
+        return destinationPierSide;
     }
     const char *onGetStepperInfo() override
     {
@@ -356,6 +373,30 @@ TEST(MeadeExtra, get_target_coordinate_positions_malformed_emits_empty)
 {
     FakeExtra h;
     EXPECT_STREQ("", dispatch("GC", h));
+}
+
+TEST(MeadeExtra, get_pier_side_without_payload_is_current_side)
+{
+    FakeExtra h;
+    EXPECT_STREQ("W#", dispatch("GP", h));
+    EXPECT_FALSE(h.destinationCalled);
+}
+
+TEST(MeadeExtra, get_destination_pier_side_parses_payload)
+{
+    FakeExtra h;
+    EXPECT_STREQ("E#", dispatch("GP10.5*-20.25", h));
+    EXPECT_TRUE(h.destinationCalled);
+    EXPECT_FLOAT_EQ(10.5f, h.destinationRa);
+    EXPECT_FLOAT_EQ(-20.25f, h.destinationDec);
+}
+
+TEST(MeadeExtra, get_destination_pier_side_malformed_emits_empty)
+{
+    FakeExtra h;
+    EXPECT_STREQ("", dispatch("GP10.5", h));
+    EXPECT_STREQ("", dispatch("GP*10", h));
+    EXPECT_FALSE(h.destinationCalled);
 }
 
 TEST(MeadeExtra, get_auto_homing_states_text)

@@ -40,6 +40,7 @@ class MeadeCommandProcessor : private oat::core::meade::IMeadeHandlers
     oat::core::meade::MeadeClockFormat onClockFormat() override;
     oat::core::meade::MeadeTrackingRate onTrackingRate() override;
     const char *onSiteName(uint8_t index) override;
+    oat::core::meade::MeadePierSide onPierSide() override;
 
     // IMeadeSetHandlers overrides. Each method receives a parser-validated
     // typed value and returns whether the mount accepted it.
@@ -128,6 +129,8 @@ class MeadeCommandProcessor : private oat::core::meade::IMeadeHandlers
     const char *onGetAutoHomingStates() override;
     oat::core::meade::ExtraAzAltPositions onGetAzAltPositions() override;
     oat::core::meade::ExtraStepperCoords onGetTargetCoordinatePositions(float raCoord, float decCoord) override;
+    oat::core::meade::MeadePierSide onGetPierSide() override;
+    oat::core::meade::MeadePierSide onGetDestinationPierSide(float raCoord, float decCoord) override;
     const char *onGetStepperInfo() override;
     const char *onGetMountHardwareInfo() override;
     const char *onGetLogBuffer() override;

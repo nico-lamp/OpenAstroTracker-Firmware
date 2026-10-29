@@ -284,6 +284,19 @@
 //        AZ, ALT, and FOC are only set if the corresponding axis is enabled. If not, the character is always '-'.
 //        Since AZ/ALT rarely move, their positions are not returned here. To get the AZ and ALT stepper positions, use the ":XGAA#" command.
 //
+// :Gm#
+//      Description:
+//        Get Side of Pier
+//      Information:
+//        Get the current pointing state of the mount (ASCOM SideOfPier). Same reply as OnStep's :Gm#.
+//      Returns:
+//        "E#" if the mount is in the normal pointing state (scope on the east side of the pier, looking west)
+//        "W#" if the mount is in the through-the-pole pointing state (scope on the west side of the pier, looking east)
+//        "N#" if the pointing state is not known (OAT tracker builds)
+//      Remarks:
+//        The pointing state is derived from the side of the pole the DEC axis is on, so it only changes on a meridian flip,
+//        not while tracking past the meridian. Use :XGPn.nn*m.mm# to find out which side a slew would end on.
+//
 //------------------------------------------------------------------
 // SET FAMILY
 //
@@ -782,6 +795,26 @@
 //        "declong" is the stepper position of the DEC stepper
 //      Returns:
 //        "ralong,declong#"
+//
+// :XGP#
+//      Description:
+//        Get Side of Pier
+//      Information:
+//        Get the current pointing state of the mount. Same as :Gm#.
+//      Returns:
+//        "E#", "W#" or "N#" (see :Gm#)
+//
+// :XGPn.nn*m.mm#
+//      Description:
+//        Get Destination Side of Pier
+//      Information:
+//        Get the pointing state the mount would end up in when slewing to the given coordinates (ASCOM DestinationSideOfPier).
+//        Comparing this with :Gm# tells whether a slew to the target will do a meridian flip.
+//      Parameters:
+//        "n.nn" is the RA coordinate (0.0 - 23.999)
+//        "m.mm" is the DEC coordinate (-90.00 - +90.00)
+//      Returns:
+//        "E#", "W#" or "N#" (see :Gm#)
 //
 // :XGR#
 //      Description:

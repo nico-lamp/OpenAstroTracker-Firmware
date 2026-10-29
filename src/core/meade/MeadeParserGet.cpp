@@ -116,6 +116,9 @@ void handleMeadeGet(MeadeResponse &r, const char *s, IMeadeGetHandlers &h)
         case 'P':
             writeCString(r, h.onSiteName(4));
             return;
+        case 'm':
+            writePierSide(r, h.onPierSide());
+            return;
         default:
             return;
     }
